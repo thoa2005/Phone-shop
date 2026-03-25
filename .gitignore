@@ -1,0 +1,16 @@
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Project specific ignores (if any are at root)
+*.log
+node_modules/
+target/
+build/
+dist/
