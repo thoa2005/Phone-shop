@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" className="scroll-smooth" suppressHydrationWarning>
-      <body className="flex flex-col min-h-screen bg-dark text-slate-200">
+      <body className="flex flex-col min-h-screen bg-dark text-slate-200" suppressHydrationWarning>
         <Providers>
           <Header />
           <main className="flex-grow pt-20">

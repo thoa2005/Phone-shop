@@ -1,16 +1,21 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ShoppingCart, User, Search, Menu, X, Activity } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useCartStore } from '@/store/cartStore';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export default function Header() {
+  const router = useRouter();
   const { user, isAuthenticated, logout } = useAuthStore();
   const { totalItems, fetchCart } = useCartStore();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isAuthenticated) fetchCart();
@@ -19,6 +24,21 @@ export default function Header() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isAuthenticated, fetchCart]);
+
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
+      setSearchOpen(false);
+      setSearchTerm('');
+    }
+  };
 
   return (
     <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'glass py-3' : 'bg-transparent py-5'}`}>
@@ -37,9 +57,33 @@ export default function Header() {
 
         {/* Actions */}
         <div className="hidden md:flex items-center space-x-6">
-          <button className="text-slate-300 hover:text-white transition-colors">
-            <Search size={20} />
-          </button>
+          {/* Search */}
+          <div className="relative">
+            {searchOpen ? (
+              <form onSubmit={handleSearch} className="flex items-center">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Tìm kiếm sản phẩm..."
+                  className="w-52 bg-white/10 border border-white/20 text-white text-sm rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-primary focus:outline-none placeholder:text-slate-500 transition-all"
+                  onBlur={() => {
+                    if (!searchTerm.trim()) {
+                      setTimeout(() => setSearchOpen(false), 200);
+                    }
+                  }}
+                />
+                <button type="button" onClick={() => { setSearchOpen(false); setSearchTerm(''); }} className="ml-2 text-slate-400 hover:text-white transition-colors">
+                  <X size={16} />
+                </button>
+              </form>
+            ) : (
+              <button onClick={() => setSearchOpen(true)} className="text-slate-300 hover:text-white transition-colors">
+                <Search size={20} />
+              </button>
+            )}
+          </div>
           
           <Link href="/cart" className="relative text-slate-300 hover:text-white transition-colors">
             <ShoppingCart size={20} />
@@ -82,6 +126,17 @@ export default function Header() {
       {/* Mobile Nav */}
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full glass border-t border-border/50 py-4 px-4 flex flex-col space-y-4">
+          {/* Mobile Search */}
+          <form onSubmit={(e) => { handleSearch(e); setMobileMenuOpen(false); }} className="flex gap-2">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Tìm kiếm sản phẩm..."
+              className="flex-1 bg-white/10 border border-white/20 text-white text-sm rounded-lg px-3 py-2 focus:ring-1 focus:ring-primary focus:outline-none placeholder:text-slate-500"
+            />
+            <button type="submit" className="bg-primary text-white px-3 py-2 rounded-lg text-sm"><Search size={16} /></button>
+          </form>
           <Link href="/products" className="py-2 border-b border-border/50">Sản phẩm</Link>
           <Link href="/categories" className="py-2 border-b border-border/50">Danh mục</Link>
           <div className="flex justify-between items-center py-2 border-b border-border/50">

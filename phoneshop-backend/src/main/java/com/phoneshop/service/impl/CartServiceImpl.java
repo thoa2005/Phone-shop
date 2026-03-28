@@ -15,13 +15,9 @@ import jakarta.persistence.PersistenceContext;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.ArrayList;
-
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class CartServiceImpl {
 
     private final CartRepository cartRepository;
@@ -70,17 +66,14 @@ public class CartServiceImpl {
                             .cart(cart).product(product)
                             .quantity(request.getQuantity()).price(price).build();
                     cartItemRepository.save(item);
-                    
-                    if (cart.getItems() == null) {
-                        cart.setItems(new ArrayList<>());
-                    }
-                    cart.getItems().add(item);
                 });
 
         entityManager.flush();
-        entityManager.refresh(cart);
+        entityManager.clear();
 
-        return toCartResponse(cart);
+        Cart refreshedCart = cartRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+        return toCartResponse(refreshedCart);
     }
 
     @Transactional
@@ -98,11 +91,12 @@ public class CartServiceImpl {
             item.setQuantity(quantity);
             cartItemRepository.save(item);
         }
-        
-        Cart cart = item.getCart();
+
         entityManager.flush();
-        entityManager.refresh(cart);
-        
+        entityManager.clear();
+
+        Cart cart = cartRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
         return toCartResponse(cart);
     }
 
@@ -115,19 +109,23 @@ public class CartServiceImpl {
         if (!item.getCart().getUser().getId().equals(user.getId())) {
             throw new BadRequestException("Not your cart item");
         }
-        Cart cart = item.getCart();
         cartItemRepository.delete(item);
-        
+
         entityManager.flush();
-        entityManager.refresh(cart);
-        
+        entityManager.clear();
+
+        Cart cart = cartRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
         return toCartResponse(cart);
     }
 
     @Transactional
     public void clearCart(Long userId) {
         cartRepository.findByUserId(userId).ifPresent(cart -> {
-            cartItemRepository.deleteByCartId(cart.getId());
+            cartItemRepository.deleteAll(cart.getItems());
+            cart.getItems().clear();
+            cartRepository.save(cart);
+            entityManager.flush();
         });
     }
 
@@ -135,13 +133,13 @@ public class CartServiceImpl {
         List<CartResponse.CartItemResponse> items = cart.getItems() == null ? List.of() :
                 cart.getItems().stream().map(item -> {
                     String img = item.getProduct().getImages() != null && !item.getProduct().getImages().isEmpty()
-                            ? item.getProduct().getImages().stream().filter(i -> i.getIsPrimary()).findFirst()
+                            ? item.getProduct().getImages().stream().filter(i -> Boolean.TRUE.equals(i.getIsPrimary())).findFirst()
                                     .map(i -> i.getImageUrl()).orElse(item.getProduct().getImages().get(0).getImageUrl())
                             : null;
-                    
+
                     BigDecimal itemPrice = item.getPrice() != null ? item.getPrice() : BigDecimal.ZERO;
                     BigDecimal subtotal = itemPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
-                    
+
                     return CartResponse.CartItemResponse.builder()
                             .id(item.getId())
                             .productId(item.getProduct().getId())

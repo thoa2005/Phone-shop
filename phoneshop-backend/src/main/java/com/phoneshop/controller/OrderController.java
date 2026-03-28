@@ -49,6 +49,6 @@ public class OrderController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<OrderResponse>> getAllOrders(@RequestParam(defaultValue = "0") int page,
                                                             @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(orderService.getAllOrders(PageRequest.of(page, size)));
+        return ResponseEntity.ok(orderService.getAllOrders(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"))));
     }
 }

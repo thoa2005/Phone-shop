@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { ChevronDown, Search } from 'lucide-react';
 import apiClient from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -32,10 +33,12 @@ const PRICE_RANGES = [
 ];
 
 export default function ProductsPage() {
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
   const [products, setProducts] = useState<Product[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [selectedPrice, setSelectedPrice] = useState(0); // Index of PRICE_RANGES
   const [sortBy, setSortBy] = useState('id');

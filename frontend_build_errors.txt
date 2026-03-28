@@ -1,0 +1,40 @@
+﻿â–² Next.js 16.1.6 (Turbopack)
+
+  Creating an optimized production build ...
+âœ“ Compiled successfully in 4.0s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/20) ...
+  Generating static pages using 11 workers (5/20) 
+  Generating static pages using 11 workers (10/20) 
+  Generating static pages using 11 workers (15/20) 
+âœ“ Generating static pages using 11 workers (20/20) in 570.1ms
+  Finalizing page optimization ...
+
+Route (app)
+â”Œ â—‹ /
+â”œ â—‹ /_not-found
+â”œ â—‹ /about
+â”œ â—‹ /admin
+â”œ â—‹ /admin/coupons
+â”œ â—‹ /admin/orders
+â”œ â—‹ /admin/products
+â”œ â—‹ /admin/products/add
+â”œ Æ’ /admin/products/edit/[id]
+â”œ â—‹ /admin/users
+â”œ â—‹ /auth/login
+â”œ â—‹ /auth/register
+â”œ â—‹ /cart
+â”œ â—‹ /categories
+â”œ Æ’ /categories/[slug]
+â”œ â—‹ /checkout
+â”œ â—‹ /checkout/vnpay-return
+â”œ â—‹ /orders
+â”œ â—‹ /products
+â”œ Æ’ /products/[slug]
+â”” â—‹ /profile
+
+
+â—‹  (Static)   prerendered as static content
+Æ’  (Dynamic)  server-rendered on demand
+

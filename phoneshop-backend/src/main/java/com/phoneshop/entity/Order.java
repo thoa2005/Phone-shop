@@ -29,12 +29,14 @@ public class Order {
     @Column(name = "total_price", nullable = false, precision = 15, scale = 2)
     private BigDecimal totalPrice;
 
+    @Builder.Default
     @Column(name = "discount_amount", precision = 15, scale = 2)
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
     @Column(name = "final_price", nullable = false, precision = 15, scale = 2)
     private BigDecimal finalPrice;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status = OrderStatus.PENDING;
@@ -46,6 +48,7 @@ public class Order {
     @Column(columnDefinition = "TEXT")
     private String note;
 
+    @Builder.Default
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 

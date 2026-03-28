@@ -2,19 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Minus, Plus, ShoppingCart, ArrowLeft, Star, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
+import { Minus, Plus, ShoppingCart, ArrowLeft, Star, ShieldCheck, Truck, RefreshCw, LogIn } from 'lucide-react';
 import apiClient from '@/lib/api';
 import { formatCurrency, getProductImage } from '@/lib/utils';
 import { useCartStore } from '@/store/cartStore';
+import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
 
 export default function CartPage() {
   const { items, totalPrice, updateQuantity, removeItem, fetchCart } = useCartStore();
+  const { isAuthenticated } = useAuthStore();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchCart().finally(() => setLoading(false));
-  }, [fetchCart]);
+    if (isAuthenticated) {
+      fetchCart().finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, [fetchCart, isAuthenticated]);
 
   const handleUpdateQty = async (id: number, currentQty: number, delta: number) => {
     const newQty = currentQty + delta;
@@ -39,6 +45,22 @@ export default function CartPage() {
     return <div className="min-h-[60vh] flex items-center justify-center">
       <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
     </div>;
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-6 container mx-auto px-4">
+        <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2">
+          <LogIn size={40} />
+        </div>
+        <h2 className="text-2xl font-bold text-white">Vui lòng đăng nhập</h2>
+        <p className="text-slate-400 text-center max-w-md">Bạn cần đăng nhập để xem giỏ hàng và mua sắm.</p>
+        <Link href="/auth/login" className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg flex items-center space-x-2">
+          <LogIn size={18} />
+          <span>Đăng nhập ngay</span>
+        </Link>
+      </div>
+    );
   }
 
   if (items.length === 0) {

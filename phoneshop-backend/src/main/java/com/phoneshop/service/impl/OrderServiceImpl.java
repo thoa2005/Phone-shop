@@ -56,10 +56,6 @@ public class OrderServiceImpl {
                 BigDecimal subtotal = price.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
                 total = total.add(subtotal);
 
-                product.setStock(product.getStock() - itemReq.getQuantity());
-                product.setSold(product.getSold() + itemReq.getQuantity());
-                productRepository.save(product);
-
                 orderItems.add(OrderItem.builder()
                         .product(product).quantity(itemReq.getQuantity()).price(price).build());
             }
@@ -79,10 +75,6 @@ public class OrderServiceImpl {
                 BigDecimal price = product.getSalePrice() != null ? product.getSalePrice() : product.getPrice();
                 BigDecimal subtotal = price.multiply(BigDecimal.valueOf(qty));
                 total = total.add(subtotal);
-
-                product.setStock(product.getStock() - qty);
-                product.setSold(product.getSold() + qty);
-                productRepository.save(product);
 
                 orderItems.add(OrderItem.builder()
                         .product(product).quantity(qty).price(price).build());
@@ -163,7 +155,34 @@ public class OrderServiceImpl {
     public OrderResponse updateStatus(Long id, String status) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-        order.setStatus(Order.OrderStatus.valueOf(status));
+
+        Order.OrderStatus oldStatus = order.getStatus();
+        Order.OrderStatus newStatus = Order.OrderStatus.valueOf(status);
+
+        // Khi chuyển sang DELIVERED: trừ kho và cộng số lượng đã bán
+        if (newStatus == Order.OrderStatus.DELIVERED && oldStatus != Order.OrderStatus.DELIVERED) {
+            for (OrderItem item : order.getItems()) {
+                Product product = item.getProduct();
+                if (product.getStock() < item.getQuantity()) {
+                    throw new BadRequestException("Không đủ tồn kho cho: " + product.getName());
+                }
+                product.setStock(product.getStock() - item.getQuantity());
+                product.setSold(product.getSold() + item.getQuantity());
+                productRepository.save(product);
+            }
+        }
+
+        // Khi chuyển sang CANCELLED từ DELIVERED: hoàn lại kho
+        if (newStatus == Order.OrderStatus.CANCELLED && oldStatus == Order.OrderStatus.DELIVERED) {
+            for (OrderItem item : order.getItems()) {
+                Product product = item.getProduct();
+                product.setStock(product.getStock() + item.getQuantity());
+                product.setSold(Math.max(0, product.getSold() - item.getQuantity()));
+                productRepository.save(product);
+            }
+        }
+
+        order.setStatus(newStatus);
         return toOrderResponse(orderRepository.save(order));
     }
 

@@ -158,6 +158,28 @@ public class ProductServiceImpl {
                         .id(s.getId()).specName(s.getSpecName()).specValue(s.getSpecValue()).build())
                         .collect(Collectors.toList());
 
+        List<ProductResponse.ReviewResponse> reviews = List.of();
+        try {
+            reviews = p.getReviews() == null ? List.of() :
+                    p.getReviews().stream().map(r -> ProductResponse.ReviewResponse.builder()
+                            .id(r.getId())
+                            .rating(r.getRating())
+                            .comment(r.getComment())
+                            .createdAt(r.getCreatedAt())
+                            .user(ProductResponse.UserInfo.builder()
+                                    .id(r.getUser().getId())
+                                    .fullName(r.getUser().getFullName())
+                                    .avatar(r.getUser().getAvatar())
+                                    .build())
+                            .build())
+                            .collect(Collectors.toList());
+        } catch (Exception e) {
+            // Lazy loading may fail for list queries, ignore silently
+        }
+
+        int reviewCount = reviews.size();
+        Float averageRating = p.getAvgRating() != null ? p.getAvgRating() : 0.0f;
+
         CategoryResponse cat = p.getCategory() == null ? null :
                 CategoryResponse.builder().id(p.getCategory().getId())
                         .name(p.getCategory().getName()).slug(p.getCategory().getSlug())
@@ -172,6 +194,8 @@ public class ProductServiceImpl {
                 .description(p.getDescription()).price(p.getPrice()).salePrice(p.getSalePrice())
                 .stock(p.getStock()).sold(p.getSold()).avgRating(p.getAvgRating())
                 .isActive(p.getIsActive()).category(cat).brand(brand)
-                .images(images).specs(specs).build();
+                .images(images).specs(specs)
+                .reviews(reviews).averageRating(averageRating).reviewCount(reviewCount)
+                .build();
     }
 }

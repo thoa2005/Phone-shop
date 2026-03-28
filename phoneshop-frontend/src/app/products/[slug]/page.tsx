@@ -65,16 +65,24 @@ export default function ProductDetailPage() {
   }, [slug]);
 
   const handleAddToCart = async () => {
-    if (!product) return;
+    if (!product) return false;
+    if (!user) {
+      toast.error('Vui lòng đăng nhập để mua hàng');
+      router.push('/auth/login');
+      return false;
+    }
     try {
       await addToCart(product.id, quantity);
       toast.success('Đã thêm sản phẩm vào giỏ hàng');
+      return true;
     } catch (e: any) {
-      if (e.response?.status === 401) {
-        toast.error('Vui lòng đăng nhập để mua hàng');
+      if (e.response?.status === 401 || e.response?.status === 403) {
+        toast.error('Vui lòng đăng nhập để làm điều này');
+        router.push('/auth/login');
       } else {
         toast.error('Lỗi khi thêm vào giỏ hàng');
       }
+      return false;
     }
   };
 
@@ -160,9 +168,19 @@ export default function ProductDetailPage() {
             <div className="flex items-center gap-6">
               <span className="text-slate-300 font-medium">Số lượng:</span>
               <div className="flex items-center bg-dark/50 border border-border/50 rounded-xl overflow-hidden">
-                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 transition-colors">-</button>
-                <span className="px-6 py-3 text-white font-medium border-x border-border/50 bg-white/5">{quantity}</span>
-                <button onClick={() => setQuantity(Math.min(product.stock, quantity + 1))} className="px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 transition-colors">+</button>
+                <button 
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))} 
+                  disabled={product.stock === 0 || quantity <= 1}
+                  className="px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                >-</button>
+                <span className="px-6 py-3 text-white font-medium border-x border-border/50 bg-white/5">
+                  {product.stock === 0 ? 0 : quantity}
+                </span>
+                <button 
+                  onClick={() => setQuantity(Math.min(product.stock, quantity + 1))} 
+                  disabled={product.stock === 0 || quantity >= product.stock}
+                  className="px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                >+</button>
               </div>
             </div>
 
@@ -178,8 +196,10 @@ export default function ProductDetailPage() {
 
               <button
                 onClick={async () => {
-                  await handleAddToCart();
-                  router.push('/cart');
+                  const success = await handleAddToCart();
+                  if (success) {
+                    router.push('/cart');
+                  }
                 }}
                 disabled={product.stock === 0}
                 className="flex-1 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-primary/25 flex items-center justify-center space-x-2 text-lg hover:-translate-y-1"

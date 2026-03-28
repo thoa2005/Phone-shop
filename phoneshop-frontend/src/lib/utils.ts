@@ -8,8 +8,13 @@ export const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-export const formatDate = (dateStr: string) => {
-  return format(new Date(dateStr), 'dd/MM/yyyy HH:mm', { locale: vi });
+export const formatDate = (dateStr: string | null | undefined) => {
+  if (!dateStr) return 'N/A';
+  try {
+    return format(new Date(dateStr), 'dd/MM/yyyy HH:mm', { locale: vi });
+  } catch {
+    return 'N/A';
+  }
 };
 
 export const getProductImage = (url: string | null | undefined) => {

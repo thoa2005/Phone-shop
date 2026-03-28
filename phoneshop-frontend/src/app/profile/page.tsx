@@ -39,7 +39,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (activeTab === 'orders') {
-      apiClient.get('/orders').then(res => setOrders(res.data.content || [])).catch(console.error);
+      apiClient.get('/orders?sort=id,desc&size=100').then(res => setOrders(res.data.content || [])).catch(console.error);
     } else if (activeTab === 'addresses') {
       fetchAddresses();
     }
@@ -216,7 +216,7 @@ export default function ProfilePage() {
                              <div className="flex items-center space-x-3">
                                 <div className="w-10 h-10 bg-white/5 rounded border border-border/50 flex items-center justify-center overflow-hidden">
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img src={getProductImage(item.productImage) || ''} alt={item.productName} className="w-full h-full object-contain p-1" />
+                                  {getProductImage(item.productImage) && <img src={getProductImage(item.productImage)!} alt={item.productName} className="w-full h-full object-contain p-1" />}
                                 </div>
                                 <div>
                                   <span className="text-slate-300 block line-clamp-1">{item.productName}</span>

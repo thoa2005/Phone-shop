@@ -2,6 +2,7 @@ package com.phoneshop.dto.response;
 
 import lombok.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
@@ -20,6 +21,9 @@ public class ProductResponse {
     private BrandResponse brand;
     private List<ImageResponse> images;
     private List<SpecResponse> specs;
+    private List<ReviewResponse> reviews;
+    private Float averageRating;
+    private Integer reviewCount;
 
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
     public static class ImageResponse {
@@ -33,5 +37,21 @@ public class ProductResponse {
         private Long id;
         private String specName;
         private String specValue;
+    }
+
+    @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+    public static class ReviewResponse {
+        private Long id;
+        private Integer rating;
+        private String comment;
+        private UserInfo user;
+        private LocalDateTime createdAt;
+    }
+
+    @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+    public static class UserInfo {
+        private Long id;
+        private String fullName;
+        private String avatar;
     }
 }
