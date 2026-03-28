@@ -8,6 +8,7 @@ export interface CartItem {
   productImage: string;
   productPrice: number;
   salePrice: number;
+  price: number;
   quantity: number;
   subtotal: number;
 }

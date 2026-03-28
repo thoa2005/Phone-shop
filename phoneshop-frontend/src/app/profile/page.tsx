@@ -37,6 +37,11 @@ export default function ProfilePage() {
   const [editingAddrId, setEditingAddrId] = useState<number | null>(null);
   const [savingAddr, setSavingAddr] = useState(false);
 
+  // Administrative units state
+  const [provinces, setProvinces] = useState<any[]>([]);
+  const [districts, setDistricts] = useState<any[]>([]);
+  const [wards, setWards] = useState<any[]>([]);
+
   useEffect(() => {
     if (activeTab === 'orders') {
       apiClient.get('/orders?sort=id,desc&size=100').then(res => setOrders(res.data.content || [])).catch(console.error);
@@ -50,6 +55,50 @@ export default function ProfilePage() {
       setProfileForm({ fullName: user.fullName || '', phone: user.phone || '' });
     }
   }, [user]);
+
+  // Fetch provinces on load
+  useEffect(() => {
+    fetch('https://provinces.open-api.vn/api/?depth=1')
+      .then(res => res.json())
+      .then(data => setProvinces(data))
+      .catch(console.error);
+  }, []);
+
+  // Fetch districts when province changes
+  useEffect(() => {
+    if (addrForm.province) {
+      const province = provinces.find(p => p.name === addrForm.province);
+      if (province) {
+        fetch(`https://provinces.open-api.vn/api/p/${province.code}?depth=2`)
+          .then(res => res.json())
+          .then(data => setDistricts(data.districts))
+          .catch(console.error);
+      } else {
+        setDistricts([]);
+        setWards([]);
+      }
+    } else {
+      setDistricts([]);
+      setWards([]);
+    }
+  }, [addrForm.province, provinces]);
+
+  // Fetch wards when district changes
+  useEffect(() => {
+    if (addrForm.district) {
+      const district = districts.find(d => d.name === addrForm.district);
+      if (district) {
+        fetch(`https://provinces.open-api.vn/api/d/${district.code}?depth=2`)
+          .then(res => res.json())
+          .then(data => setWards(data.wards))
+          .catch(console.error);
+      } else {
+        setWards([]);
+      }
+    } else {
+      setWards([]);
+    }
+  }, [addrForm.district, districts]);
 
   const fetchAddresses = () => {
     apiClient.get('/addresses').then(res => setAddresses(res.data)).catch(() => toast.error('Không thể tải địa chỉ'));
@@ -340,16 +389,45 @@ export default function ProfilePage() {
                       </div>
                       <div>
                         <label className="text-sm font-medium text-slate-400 block mb-1">Tỉnh / Thành phố</label>
-                        <input type="text" value={addrForm.province} onChange={(e) => setAddrForm({ ...addrForm, province: e.target.value })} className="w-full bg-dark border border-border/50 text-white rounded-lg px-4 py-2.5 focus:ring-1 focus:ring-primary" />
+                        <select 
+                          value={addrForm.province} 
+                          onChange={(e) => setAddrForm({ ...addrForm, province: e.target.value, district: '', ward: '' })} 
+                          className="w-full bg-dark border border-border/50 text-white rounded-lg px-4 py-2.5 focus:ring-1 focus:ring-primary appearance-none"
+                        >
+                          <option value="">Chọn Tỉnh / Thành phố</option>
+                          {provinces.map(p => (
+                            <option key={p.code} value={p.name}>{p.name}</option>
+                          ))}
+                        </select>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="text-sm font-medium text-slate-400 block mb-1">Quận / Huyện</label>
-                          <input type="text" value={addrForm.district} onChange={(e) => setAddrForm({ ...addrForm, district: e.target.value })} className="w-full bg-dark border border-border/50 text-white rounded-lg px-4 py-2.5 focus:ring-1 focus:ring-primary" />
+                          <select 
+                            value={addrForm.district} 
+                            onChange={(e) => setAddrForm({ ...addrForm, district: e.target.value, ward: '' })} 
+                            className="w-full bg-dark border border-border/50 text-white rounded-lg px-4 py-2.5 focus:ring-1 focus:ring-primary appearance-none"
+                            disabled={!addrForm.province || districts.length === 0}
+                          >
+                            <option value="">Chọn Quận / Huyện</option>
+                            {districts.map(d => (
+                              <option key={d.code} value={d.name}>{d.name}</option>
+                            ))}
+                          </select>
                         </div>
                         <div>
                           <label className="text-sm font-medium text-slate-400 block mb-1">Phường / Xã</label>
-                          <input type="text" value={addrForm.ward} onChange={(e) => setAddrForm({ ...addrForm, ward: e.target.value })} className="w-full bg-dark border border-border/50 text-white rounded-lg px-4 py-2.5 focus:ring-1 focus:ring-primary" />
+                          <select 
+                            value={addrForm.ward} 
+                            onChange={(e) => setAddrForm({ ...addrForm, ward: e.target.value })} 
+                            className="w-full bg-dark border border-border/50 text-white rounded-lg px-4 py-2.5 focus:ring-1 focus:ring-primary appearance-none"
+                            disabled={!addrForm.district || wards.length === 0}
+                          >
+                            <option value="">Chọn Phường / Xã</option>
+                            {wards.map(w => (
+                              <option key={w.code} value={w.name}>{w.name}</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
                       <div>

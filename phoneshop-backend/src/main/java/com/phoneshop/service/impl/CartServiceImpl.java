@@ -122,10 +122,12 @@ public class CartServiceImpl {
     @Transactional
     public void clearCart(Long userId) {
         cartRepository.findByUserId(userId).ifPresent(cart -> {
-            cartItemRepository.deleteAll(cart.getItems());
-            cart.getItems().clear();
-            cartRepository.save(cart);
-            entityManager.flush();
+            if (cart.getItems() != null) {
+                cartItemRepository.deleteAll(cart.getItems());
+                cart.getItems().clear();
+                cartRepository.save(cart);
+                entityManager.flush();
+            }
         });
     }
 

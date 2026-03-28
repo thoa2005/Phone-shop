@@ -108,7 +108,12 @@ export default function CartPage() {
                   </button>
                 </div>
                 
-                <div className="text-xl font-bold text-primary">{formatCurrency(item.productPrice)}</div>
+                <div className="flex items-end space-x-2">
+                  <div className="text-xl font-bold text-primary">{formatCurrency(item.price)}</div>
+                  {item.productPrice && item.productPrice > item.price && (
+                    <div className="text-sm line-through text-slate-500 pb-0.5">{formatCurrency(item.productPrice)}</div>
+                  )}
+                </div>
                 
                 <div className="flex items-center space-x-4 pt-2">
                   <div className="flex items-center bg-dark/50 border border-border/50 rounded-lg overflow-hidden">
