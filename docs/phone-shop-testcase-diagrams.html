@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PhoneShop – Sơ đồ test case</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', function () {
+      mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose', themeVariables: { primaryColor: '#dbeafe', primaryTextColor: '#172554', primaryBorderColor: '#2563eb', lineColor: '#475569', tertiaryColor: '#f8fafc', fontFamily: 'Inter, Arial, sans-serif' } });
+      mermaid.run({ querySelector: '.mermaid' });
+    });
+  </script>
+  <style>
+    :root { color-scheme: light; --ink:#172554; --muted:#475569; --blue:#2563eb; --soft:#eff6ff; --line:#cbd5e1; --bg:#f8fafc; }
+    * { box-sizing:border-box; }
+    body { margin:0; font:16px/1.55 Inter,Arial,sans-serif; color:var(--ink); background:var(--bg); }
+    header { padding:44px max(24px,calc((100% - 1120px)/2)); background:linear-gradient(135deg,#172554,#1d4ed8); color:white; }
+    h1 { margin:0 0 8px; font-size:clamp(28px,5vw,44px); } header p { margin:0; opacity:.9; }
+    nav { position:sticky; top:0; z-index:2; padding:12px max(24px,calc((100% - 1120px)/2)); background:white; border-bottom:1px solid var(--line); display:flex; gap:8px; flex-wrap:wrap; }
+    nav a { padding:7px 12px; border-radius:999px; color:var(--blue); text-decoration:none; font-size:14px; font-weight:600; } nav a:hover { background:var(--soft); }
+    main { max-width:1120px; margin:auto; padding:28px 24px 56px; }
+    section { margin:0 0 36px; scroll-margin-top:72px; }
+    h2 { font-size:25px; margin:0 0 8px; } .lead { color:var(--muted); margin:0 0 16px; }
+    .diagram { background:white; border:1px solid var(--line); border-radius:14px; padding:18px; overflow:auto; }
+    .diagram .mermaid { min-width:650px; text-align:center; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(245px,1fr)); gap:14px; }
+    .card { background:white; border:1px solid var(--line); border-radius:12px; padding:16px; }
+    .card h3 { margin:0 0 7px; color:#1d4ed8; font-size:17px; }.card p { margin:0; color:var(--muted); }
+    .legend { display:flex; flex-wrap:wrap; gap:10px; margin:0 0 16px; color:var(--muted); font-size:14px; }.tag { border-radius:999px; padding:3px 10px; background:var(--soft); color:var(--blue); font-weight:600; }
+    table { width:100%; border-collapse:collapse; background:white; border:1px solid var(--line); border-radius:12px; overflow:hidden; } th,td { padding:12px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line); } th { color:#1e3a8a; background:#eff6ff; } tr:last-child td { border-bottom:0; }
+    .risk { border-left:5px solid #dc2626; }.risk h3 { color:#b91c1c; }
+    footer { padding:22px 24px; text-align:center; color:var(--muted); border-top:1px solid var(--line); background:white; }
+    @media (max-width:680px) { header { padding:32px 20px; } main { padding:22px 16px; } .diagram { padding:10px; } }
+  </style>
+</head>
+<body>
+  <header><h1>PhoneShop · Sơ đồ phục vụ viết test case</h1><p>Tổng hợp từ frontend Next.js, backend Spring Boot, bảo mật JWT và schema MySQL.</p></header>
+  <nav aria-label="Điều hướng sơ đồ"><a href="#usecase">Use case</a><a href="#functions">Chức năng</a><a href="#purchase">Mua hàng</a><a href="#order">Trạng thái đơn</a><a href="#security">Phân quyền</a><a href="#scope">Phạm vi test</a><a href="#api">API/UI</a><a href="#database">Database</a><a href="#quality">Chất lượng</a><a href="#exit">Exit criteria</a></nav>
+  <main>
+    <section id="usecase">
+      <h2>1. Use case tổng quát</h2><p class="lead">Khách chỉ xem nội dung công khai; khách hàng thực hiện giao dịch sau đăng nhập; quản trị viên quản trị dữ liệu và vận hành đơn hàng.</p>
+      <div class="legend"><span class="tag">🔒 Yêu cầu JWT</span><span class="tag">👑 Chỉ ADMIN</span><span class="tag">VNPay là hệ thống ngoài</span></div>
+      <div class="diagram"><pre class="mermaid">
+flowchart LR
+  guest([Khách])
+  customer([Khách hàng])
+  admin([Quản trị viên])
+  vnpay([Cổng VNPay])
+  subgraph system[Hệ thống PhoneShop]
+    uc1([Xem / tìm / lọc sản phẩm])
+    uc2([Xem danh mục, thương hiệu và chi tiết])
+    uc3([Đăng ký / đăng nhập / refresh token])
+    uc4([Quản lý giỏ hàng 🔒])
+    uc5([Hồ sơ và địa chỉ 🔒])
+    uc6([Đặt hàng, áp coupon 🔒])
+    uc7([Thanh toán COD / VNPay 🔒])
+    uc8([Xem đơn hàng 🔒])
+    uc9([Viết đánh giá 🔒])
+    uc10([Dashboard 👑])
+    uc11([Quản lý sản phẩm 👑])
+    uc12([Quản lý đơn hàng 👑])
+    uc13([Quản lý user / coupon 👑])
+    uc14([Quản lý danh mục, hãng, đánh giá 👑])
+  end
+  guest --> uc1 & uc2 & uc3
+  customer --> uc1 & uc2 & uc4 & uc5 & uc6 & uc7 & uc8 & uc9
+  admin --> uc10 & uc11 & uc12 & uc13 & uc14
+  uc6 -. include .-> uc4
+  uc6 -. include .-> uc5
+  uc7 <--> vnpay
+      </pre></div>
+    </section>
+    <section id="functions">
+      <h2>2. Phân rã chức năng → test suite</h2><p class="lead">Mỗi ô là một nhóm test case độc lập trong test plan.</p>
+      <div class="grid">
+        <article class="card"><h3>CATALOG</h3><p>Tìm kiếm; lọc hãng, danh mục, giá; phân trang/sắp xếp; chi tiết, ảnh, thông số và đánh giá sản phẩm.</p></article>
+        <article class="card"><h3>AUTH</h3><p>Đăng ký, đăng nhập, refresh token, khóa tài khoản, cập nhật hồ sơ.</p></article>
+        <article class="card"><h3>CART & ADDRESS</h3><p>Thêm/sửa/xóa giỏ; kiểm tồn; CRUD địa chỉ; chuyển địa chỉ mặc định.</p></article>
+        <article class="card"><h3>ORDER & COUPON</h3><p>Tạo đơn từ giỏ/item; tổng giá; giảm giá; xóa giỏ; lịch sử đơn.</p></article>
+        <article class="card"><h3>PAYMENT & REVIEW</h3><p>VNPay URL/callback; COD; rating 1–5; một review mỗi user/sản phẩm.</p></article>
+        <article class="card"><h3>ADMIN_RBAC</h3><p>Dashboard; product/coupon CRUD; quản lý user; quản lý trạng thái đơn; kiểm thử phân quyền.</p></article>
+      </div>
+    </section>
+    <section id="purchase">
+      <h2>3. Luồng mua hàng và thanh toán</h2><p class="lead">Đây là flow end-to-end trọng tâm cho test tích hợp và test hệ thống.</p>
+      <div class="diagram"><pre class="mermaid">
+flowchart TD
+  A([Đăng nhập]) --> B[Thêm sản phẩm vào giỏ]
+  B --> C{Số lượng ≤ tồn kho?}
+  C -- Không --> E[Thông báo lỗi]
+  C -- Có --> D[Giỏ được cập nhật]
+  D --> F[Chọn địa chỉ và phương thức]
+  F --> G{Có coupon?}
+  G -- Có --> H[Kiểm active / ngày / quota / min order]
+  H -- Không hợp lệ --> I[Không tạo đơn]
+  H -- Hợp lệ --> J[Tính total, discount, final price]
+  G -- Không --> J
+  J --> K[Tạo đơn PENDING + xóa giỏ]
+  K --> L{VNPay?}
+  L -- COD --> M[Hiển thị lịch sử đơn]
+  L -- Có --> N[Tạo URL + payment PENDING]
+  N --> O[VNPay callback]
+  O --> P{Chữ ký hợp lệ &amp; code 00?}
+  P -- Có --> Q[Payment COMPLETED; đơn CONFIRMED]
+  P -- Không --> R[Payment FAILED]
+      </pre></div>
+    </section>
+    <section id="order">
+      <h2>4. Vòng đời đơn hàng và tồn kho</h2><p class="lead">Phủ test chuyển trạng thái hợp lệ/không hợp lệ và tác động tồn kho tại DELIVERED/CANCELLED.</p>
+      <div class="diagram"><pre class="mermaid">
+stateDiagram-v2
+  [*] --> PENDING: tạo đơn
+  PENDING --> CONFIRMED
+  PENDING --> SHIPPING
+  PENDING --> CANCELLED
+  CONFIRMED --> SHIPPING
+  CONFIRMED --> CANCELLED
+  SHIPPING --> DELIVERED: trừ kho, tăng sold
+  SHIPPING --> CANCELLED
+  DELIVERED --> RETURNED
+  DELIVERED --> CANCELLED: hoàn kho, giảm sold
+      </pre></div>
+    </section>
+    <section id="security">
+      <h2>5. Luồng phân quyền JWT</h2><p class="lead">Dùng làm cơ sở viết test API 401/403, refresh token và RBAC.</p>
+      <div class="diagram"><pre class="mermaid">
+flowchart TD
+  A[Yêu cầu API] --> B{API công khai?}
+  B -- Có --> C[Xử lý]
+  B -- Không --> D{Bearer JWT hợp lệ?}
+  D -- Không --> E[401 Unauthorized]
+  D -- Có --> F{Cần ADMIN?}
+  F -- Không --> C
+  F -- Có --> G{role ADMIN?}
+  G -- Có --> C
+  G -- Không --> H[403 Forbidden]
+  E --> I[Frontend refresh token một lần]
+  I --> J{Refresh hợp lệ?}
+  J -- Có --> A
+  J -- Không --> K[Xóa cookie; tới đăng nhập]
+      </pre></div>
+    </section>
+    <section id="scope">
+      <h2>6. Test condition ưu tiên</h2>
+      <table><thead><tr><th>Nhóm</th><th>Điều kiện cần phủ</th><th>Kỹ thuật</th></tr></thead><tbody>
+        <tr><td>AUTH</td><td>Email sai/trùng, mật khẩu &lt; 6, login sai, user bị khóa, refresh token sai/hết hạn.</td><td>Equivalence, boundary, security</td></tr>
+        <tr><td>CART</td><td>Giỏ rỗng, cộng dồn item, số lượng 0/âm, vượt kho, item của user khác.</td><td>State, boundary, authorization</td></tr>
+        <tr><td>COUPON</td><td>Tắt/chưa hiệu lực/hết hạn/hết quota/dưới min order; %/fixed; final price không âm.</td><td>Decision table</td></tr>
+        <tr><td>ORDER & PAYMENT</td><td>Địa chỉ, giỏ, stock; callback VNPay đúng/sai; DELIVERED/CANCELLED tác động kho.</td><td>E2E, integration, state</td></tr>
+        <tr><td>ADMIN</td><td>User/khách bị từ chối ở API admin; CRUD product/coupon; khóa user.</td><td>RBAC, CRUD</td></tr>
+      </tbody></table>
+      <div class="grid" style="margin-top:16px">
+        <article class="card risk"><h3>Rủi ro P1 · Ownership</h3><p>Test user A không được đọc đơn, sửa/xóa địa chỉ hoặc dùng addressId của user B.</p></article>
+        <article class="card risk"><h3>Rủi ro P1 · Tồn kho</h3><p>Test cập nhật quantity giỏ vượt tồn kho; hệ thống phải chặn tại giỏ hoặc khi tạo đơn.</p></article>
+        <article class="card risk"><h3>Rủi ro P1 · Trạng thái</h3><p>Test các bước chuyển không theo luồng như CANCELLED → SHIPPING hoặc RETURNED → DELIVERED.</p></article>
+      </div>
+    </section>
+    <section id="api">
+      <h2>7. Ma trận coverage API và giao diện</h2><p class="lead">Mỗi dòng cần có test dương, âm, biên, quyền truy cập, status code và xác nhận dữ liệu database sau thao tác.</p>
+      <div class="diagram"><table><thead><tr><th>Module</th><th>Endpoint / màn hình cần cover</th><th>Kiểm thử bắt buộc</th></tr></thead><tbody>
+        <tr><td>Auth</td><td>POST register, login, refresh; trang đăng ký/đăng nhập</td><td>422/400 field invalid; email trùng; password &lt; 6; sai credential; disabled; access/refresh token; redirect và cookie.</td></tr>
+        <tr><td>Catalog</td><td>GET products, products/{slug}, products/id/{id}, categories, brands; Home/Products/Category/Detail</td><td>Filter kết hợp; min/max biên; page/size/sort sai; slug/id không có; loading/empty/error; ảnh và giá sale.</td></tr>
+        <tr><td>Product admin</td><td>POST/PUT/DELETE products; trang danh sách/thêm/sửa</td><td>ADMIN vs USER; required field; price/stock âm; slug trùng; category/brand không có; ảnh primary/spec; soft delete và hiển thị catalog.</td></tr>
+        <tr><td>Cart</td><td>GET cart; POST/PUT/DELETE cart/items; Product card/Detail/Cart</td><td>Không JWT; sản phẩm không có; qty null/0/âm/vượt kho; cộng dồn; item khác chủ; tổng tiền, badge, xóa item.</td></tr>
+        <tr><td>Profile/address</td><td>GET/PUT users/me; GET/POST/PUT/DELETE addresses; Profile</td><td>Required field; default address duy nhất; CRUD; ownership; user profile không sửa role/email ngoài ý muốn.</td></tr>
+        <tr><td>Coupon</td><td>GET/POST/PUT/DELETE coupons; POST validate; checkout/admin coupon</td><td>Code trùng; type/value; ngày bắt đầu/kết thúc; min order; max uses; active; PERCENT/FIXED; price không âm.</td></tr>
+        <tr><td>Order</td><td>POST/GET orders, GET orders/{id}, PATCH status, GET admin/all; checkout/orders/admin orders</td><td>Giỏ rỗng; item request; address ownership; stock; pagination; total/discount; status transition; inventory; RBAC.</td></tr>
+        <tr><td>Payment</td><td>POST payment/vnpay/create; GET vnpay/return; checkout/return page</td><td>Chủ đơn; one payment/order; amount; chữ ký; code 00/khác 00; callback lặp; transaction ID; redirect/error.</td></tr>
+        <tr><td>Review</td><td>GET reviews/product/{id}; POST/DELETE reviews; trang chi tiết</td><td>Rating 0/1/5/6; product không có; duplicate user/product; avg rating sau create/delete; admin-only delete.</td></tr>
+        <tr><td>Admin data</td><td>Category và Brand CRUD; dashboard; user list/status</td><td>ADMIN-only; id không có; name/slug; paged result; toggle active; dashboard count đúng.</td></tr>
+      </tbody></table></div>
+    </section>
+    <section id="quality">
+      <h2>8. Coverage phi chức năng, dữ liệu và tích hợp</h2><p class="lead">Đây là phần còn thiếu nếu chỉ dừng ở use case; cần đưa vào test plan để đánh giá toàn diện.</p>
+      <div class="grid">
+        <article class="card"><h3>Security</h3><p>401/403; JWT giả mạo/hết hạn; refresh replay; IDOR; XSS ở name/comment/note; SQL injection; CORS; không lộ password/token/error stack.</p></article>
+        <article class="card"><h3>Database & transaction</h3><p>Foreign key/cascade; unique email/slug/coupon; rollback khi tạo đơn/payment lỗi; concurrent checkout cho tồn kho cuối; coupon dùng đồng thời.</p></article>
+        <article class="card"><h3>Performance</h3><p>Tải danh sách và tìm kiếm với dữ liệu lớn; tạo đơn đồng thời; thời gian API; phân trang; tải đồng thời theo mục tiêu lớp đặt ra.</p></article>
+        <article class="card"><h3>Reliability</h3><p>Mất mạng/timeout; backend 5xx; VNPay callback trễ/lặp; refresh lỗi; retry không nhân đôi order/payment/coupon count.</p></article>
+        <article class="card"><h3>Usability & accessibility</h3><p>Mobile/desktop; Chrome/Edge/Firefox; tab keyboard; focus; label form; lỗi dễ hiểu; màn hình empty/loading/error; màu đủ tương phản.</p></article>
+        <article class="card"><h3>Data integrity</h3><p>Total/discount/finalPrice nhất quán; stock/sold không âm; default address đúng một; order/payment/review liên kết đúng chủ sở hữu.</p></article>
+      </div>
+    </section>
+    <section id="database">
+      <h2>9. Database coverage</h2><p class="lead">Database MySQL gồm 14 bảng. Mọi API ghi dữ liệu phải được kiểm chứng đồng thời ở HTTP response và dữ liệu đã lưu.</p>
+      <div class="diagram"><pre class="mermaid">
+erDiagram
+  USERS ||--|| CART : owns
+  USERS ||--o{ ADDRESSES : has
+  USERS ||--o{ ORDERS : places
+  USERS ||--o{ REVIEWS : writes
+  CATEGORIES ||--o{ PRODUCTS : classifies
+  BRANDS ||--o{ PRODUCTS : manufactures
+  PRODUCTS ||--o{ PRODUCT_IMAGES : has
+  PRODUCTS ||--o{ PRODUCT_SPECS : has
+  CART ||--o{ CART_ITEMS : contains
+  PRODUCTS ||--o{ CART_ITEMS : selected
+  ORDERS ||--o{ ORDER_ITEMS : contains
+  PRODUCTS ||--o{ ORDER_ITEMS : ordered
+  ADDRESSES ||--o{ ORDERS : delivers_to
+  COUPONS ||--o{ ORDERS : applied_to
+  ORDERS ||--|| PAYMENTS : paid_by
+  PRODUCTS ||--o{ REVIEWS : receives
+  ORDERS ||--o{ REVIEWS : related_to
+  USERS { bigint id PK
+          varchar full_name
+          varchar email
+          varchar password
+          varchar phone
+          varchar avatar
+          enum role
+          boolean is_active
+          timestamp created_at }
+  CATEGORIES { bigint id PK
+               varchar name
+               varchar slug
+               varchar image }
+  BRANDS { bigint id PK
+           varchar name
+           varchar logo }
+  PRODUCTS { bigint id PK
+             bigint category_id FK
+             bigint brand_id FK
+             varchar name
+             varchar slug
+             text description
+             decimal price
+             decimal sale_price
+             int stock
+             int sold
+             float avg_rating
+             boolean is_active }
+  PRODUCT_IMAGES { bigint id PK
+                   bigint product_id FK
+                   varchar image_url
+                   boolean is_primary }
+  PRODUCT_SPECS { bigint id PK
+                  bigint product_id FK
+                  varchar spec_name
+                  varchar spec_value }
+  ADDRESSES { bigint id PK
+              bigint user_id FK
+              varchar full_name
+              varchar phone
+              varchar province
+              varchar district
+              varchar ward
+              text detail
+              boolean is_default }
+  CART { bigint id PK
+         bigint user_id FK
+         timestamp created_at }
+  CART_ITEMS { bigint id PK
+               bigint cart_id FK
+               bigint product_id FK
+               int quantity
+               decimal price }
+  COUPONS { bigint id PK
+            varchar code
+            enum type
+            decimal value
+            decimal min_order
+            int max_uses
+            int used_count
+            date start_date
+            date end_date
+            boolean is_active }
+  ORDERS { bigint id PK
+           bigint user_id FK
+           bigint address_id FK
+           bigint coupon_id FK
+           decimal total_price
+           decimal discount_amount
+           decimal final_price
+           enum status
+           enum payment_method }
+  ORDER_ITEMS { bigint id PK
+                bigint order_id FK
+                bigint product_id FK
+                int quantity
+                decimal price }
+  PAYMENTS { bigint id PK
+             bigint order_id FK
+             varchar method
+             varchar status
+             varchar transaction_id
+             decimal amount
+             timestamp paid_at }
+  REVIEWS { bigint id PK
+            bigint user_id FK
+            bigint product_id FK
+            bigint order_id FK
+            int rating
+            text comment
+            timestamp created_at }
+      </pre></div>
+      <h3 style="margin-top:24px">9.1 Ma trận ràng buộc và test database</h3>
+      <div class="diagram"><table><thead><tr><th>Đối tượng</th><th>Ràng buộc từ schema</th><th>Test database bắt buộc</th></tr></thead><tbody>
+        <tr><td>users</td><td>`email` UNIQUE, full_name/email/password NOT NULL; role USER/ADMIN; is_active.</td><td>Tạo email trùng; trường bắt buộc; password phải được hash; toggle active ngăn login; không lộ password trong response/log.</td></tr>
+        <tr><td>products</td><td>`slug` UNIQUE; price, stock NOT NULL; FK category/brand SET NULL khi xóa.</td><td>Slug trùng; price/stock biên; xóa category/brand đang được tham chiếu; product image/spec cascade; soft-delete khác với DELETE DB.</td></tr>
+        <tr><td>cart/cart_items</td><td>Một cart/user (UNIQUE user_id); item FK cart/product CASCADE; quantity/price NOT NULL.</td><td>Đăng ký tạo đúng một cart; xóa user/cart xóa item; quantity > 0; item product bị xóa; không tạo duplicate cart hoặc orphan item.</td></tr>
+        <tr><td>addresses</td><td>FK user CASCADE; tên/sđt NOT NULL; default flag.</td><td>Xóa user xóa địa chỉ; địa chỉ default duy nhất theo user (business rule); addressId phải thuộc user khi đặt đơn.</td></tr>
+        <tr><td>coupons</td><td>`code` UNIQUE; type PERCENT/FIXED; counter và ngày hiệu lực.</td><td>Code trùng; used_count không vượt max_uses dưới concurrent order; min_order/value; start/end date hợp lý; xóa coupon đã có order dùng SET NULL.</td></tr>
+        <tr><td>orders/order_items</td><td>FK user; address/coupon SET NULL; order item CASCADE khi xóa order.</td><td>Tổng giá = tổng item; discount/finalPrice chính xác; order không mồ côi; xóa address/coupon giữ order; item/snapshot giá đúng tại thời điểm tạo đơn.</td></tr>
+        <tr><td>payments</td><td>Một payment/order (UNIQUE order_id); amount/method/status NOT NULL.</td><td>Tạo callback lặp không sinh payment thứ hai; payment amount = order.finalPrice; transactionId; xóa order cascade payment.</td></tr>
+        <tr><td>reviews</td><td>rating CHECK 1..5; FK user/product CASCADE, order SET NULL.</td><td>Rating 0/6 bị từ chối; xóa user/product xóa review; xóa order giữ review nhưng order_id NULL; avg_rating tính lại đúng.</td></tr>
+      </tbody></table></div>
+      <h3 style="margin-top:24px">9.2 Transaction, đồng thời và test data</h3>
+      <div class="grid">
+        <article class="card"><h3>Atomicity</h3><p>Buộc lỗi ở mọi bước tạo đơn: không được còn order, order_item, coupon used_count hoặc cart bị xóa dở dang. Kiểm chứng rollback bằng query trước/sau.</p></article>
+        <article class="card"><h3>Concurrency</h3><p>Hai user mua lượng tồn kho cuối; hai request dùng coupon ở lượt cuối; hai callback VNPay cho cùng order. Kết quả không oversell, không double count, không duplicate payment.</p></article>
+        <article class="card"><h3>Isolation</h3><p>Không hiển thị dữ liệu nửa chừng; total, stock, used_count và trạng thái order nhất quán giữa các request đồng thời.</p></article>
+        <article class="card"><h3>Test fixtures</h3><p>Chuẩn bị user USER-A/USER-B/ADMIN; product stock 0/1/n; coupon active/inactive/expired/future/maxed; cart empty/full; order ở mọi status; payment pending/completed/failed.</p></article>
+        <article class="card"><h3>Migration & recovery</h3><p>Chạy schema.sql từ database trống; nạp data.sql; chạy lại không phá dữ liệu; backup/restore test DB; không thử trực tiếp trên production.</p></article>
+        <article class="card"><h3>DB security</h3><p>Tài khoản ứng dụng quyền tối thiểu; mật khẩu DB không commit; không trả SQL exception ra UI; phân tách test/staging/production; dữ liệu cá nhân được che trong report.</p></article>
+      </div>
+    </section>
+    <section id="exit">
+      <h2>10. Checklist hoàn tất coverage</h2><p class="lead">Chỉ có thể tuyên bố test toàn diện trong phạm vi yêu cầu khi toàn bộ mục dưới đây được hoàn thành và có bằng chứng chạy test.</p>
+      <div class="diagram"><table><thead><tr><th>Tiêu chí</th><th>Điều kiện đạt</th><th>Bằng chứng</th></tr></thead><tbody>
+        <tr><td>Requirement coverage</td><td>100% use case, API và màn hình được trace tới ít nhất một test case.</td><td>RTM: Requirement / API / UI → TC ID.</td></tr>
+        <tr><td>Decision & boundary</td><td>Mọi điều kiện coupon, tồn kho, rating, giá, ngày, phân quyền có ca true/false và min/max/ngoài biên.</td><td>Decision table và test data.</td></tr>
+        <tr><td>State coverage</td><td>Mọi trạng thái đơn/payment và chuyển trạng thái hợp lệ/không hợp lệ đều được test.</td><td>State-transition matrix.</td></tr>
+        <tr><td>Security coverage</td><td>Public/USER/ADMIN và ownership được kiểm tra ở mọi API nhạy cảm.</td><td>Security test report, bug ID nếu có.</td></tr>
+        <tr><td>Integration coverage</td><td>Cart → coupon → order → COD/VNPay → inventory; callback thất bại/lặp.</td><td>E2E execution log và database assertions.</td></tr>
+        <tr><td>Database integrity</td><td>Toàn bộ FK/unique/check/cascade, transaction rollback và concurrent order/coupon/payment đạt yêu cầu.</td><td>SQL assertion trước/sau test và execution log.</td></tr>
+        <tr><td>Non-functional</td><td>Đạt ngưỡng hiệu năng, tương thích, responsive, accessibility đã thống nhất.</td><td>Test report và môi trường chạy.</td></tr>
+        <tr><td>Defect exit</td><td>Không còn P0/P1 mở; P2/P3 được chấp nhận rõ ràng.</td><td>Danh sách bug được sign-off.</td></tr>
+      </tbody></table></div>
+    </section>
+  </main>
+  <footer>PhoneShop · Tài liệu trực quan để lập test plan và test case</footer>
+</body>
+</html>

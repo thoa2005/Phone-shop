@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PhoneShop - Use case tổng quát</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #f8fafc; color: #172554; }
+    body { padding: 30px; font-family: Arial, sans-serif; }
+    h1 { margin: 0 0 6px; text-align: center; font-size: 30px; }
+    p { margin: 0 0 20px; text-align: center; color: #475569; font-size: 16px; }
+    .frame { width: 100%; min-height: 850px; padding: 20px; background: #fff; border: 1px solid #cbd5e1; border-radius: 16px; display: flex; align-items: center; justify-content: center; }
+    .mermaid { width: 100%; text-align: center; }
+    .mermaid svg { width: 100% !important; max-width: 1460px !important; height: auto !important; }
+  </style>
+</head>
+<body>
+  <h1>Use case tổng quát — PhoneShop</h1>
+  <p>Khách chưa đăng nhập · Khách hàng đã đăng nhập · Quản trị viên · Cổng thanh toán VNPay</p>
+  <main class="frame">
+    <pre class="mermaid">
+flowchart LR
+  guest([Khách])
+  customer([Khách hàng])
+  admin([Quản trị viên])
+  vnpay([Cổng VNPay])
+
+  subgraph system[Hệ thống PhoneShop]
+    uc1([Xem / tìm / lọc sản phẩm])
+    uc2([Xem danh mục, thương hiệu và chi tiết])
+    uc3([Đăng ký / đăng nhập / refresh token])
+    uc4([Quản lý giỏ hàng 🔒])
+    uc5([Hồ sơ và địa chỉ 🔒])
+    uc6([Đặt hàng, áp coupon 🔒])
+    uc7([Thanh toán COD / VNPay 🔒])
+    uc8([Xem đơn hàng 🔒])
+    uc9([Viết đánh giá 🔒])
+    uc10([Dashboard 👑])
+    uc11([Quản lý sản phẩm 👑])
+    uc12([Quản lý đơn hàng 👑])
+    uc13([Quản lý user / coupon 👑])
+    uc14([Quản lý danh mục, hãng, đánh giá 👑])
+  end
+
+  guest --> uc1 & uc2 & uc3
+  customer --> uc1 & uc2 & uc4 & uc5 & uc6 & uc7 & uc8 & uc9
+  admin --> uc10 & uc11 & uc12 & uc13 & uc14
+  uc6 -. include .-> uc4
+  uc6 -. include .-> uc5
+  uc7 <--> vnpay
+    </pre>
+  </main>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { curve: 'basis', htmlLabels: true, useMaxWidth: true },
+      themeVariables: {
+        primaryColor: '#dbeafe',
+        primaryTextColor: '#172554',
+        primaryBorderColor: '#2563eb',
+        lineColor: '#475569',
+        tertiaryColor: '#f8fafc',
+        fontFamily: 'Arial, sans-serif'
+      }
+    });
+  </script>
+</body>
+</html>
