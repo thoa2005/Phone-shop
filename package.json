@@ -1,0 +1,13 @@
+{
+  "name": "phone-shop-e2e",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:e2e": "playwright test",
+    "test:e2e:list": "playwright test --list",
+    "test:e2e:report": "playwright show-report tests/playwright-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}
