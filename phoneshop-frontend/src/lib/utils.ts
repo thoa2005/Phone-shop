@@ -20,5 +20,6 @@ export const formatDate = (dateStr: string | null | undefined) => {
 export const getProductImage = (url: string | null | undefined) => {
   if (!url) return null;
   if (url.startsWith('http')) return url;
-  return `http://localhost:8081/uploads/${url}`;
+  const uploadBaseUrl = process.env.NEXT_PUBLIC_UPLOAD_URL || '/uploads';
+  return `${uploadBaseUrl}/${url}`;
 };
