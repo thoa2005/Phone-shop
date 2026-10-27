@@ -13,7 +13,7 @@ export default function Hero() {
         <div className="space-y-8">
           <div className="inline-flex items-center space-x-2 glass px-4 py-2 rounded-full border-primary/30 text-primary text-sm font-medium">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <span>Sản phẩm mới ra mắt 2026</span>
+            <span>CI/CD 2026</span>
           </div>
           
           <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight">
